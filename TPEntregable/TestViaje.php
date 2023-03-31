@@ -45,16 +45,16 @@ function menu($opcion,$listaViajes,$listaPasajeros){
                 // Verificar que $viaje->getPasajeros() no sea void
                  //validar que si el vuelo no tiene pasajeros que no intente mostrarlos.
                 if (!empty($viaje->getPasajeros())) {
+                    echo "Datos del viaje: "  ."\n". "Destino--> " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros--> " . $viaje->getCantMaxPasajeros()."\n". "Cantidad total de pasajeros--> " .$viaje->getCantPasajeros()."\n";
                     $personas = $viaje->getPasajeros();
                     for($i = 0; $i < count($personas); $i++){
                         $pers = $personas[$i];
-                        $str = $pers->getNombre();
                         //el vuelo tiene pasajeros, muestra datos del vuelo y pasajeros.
-                        echo "Datos viaje: "  ."\n". "Destino: " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros: " . $viaje->getCantMaxPasajeros()."\n". "Cantidad total de pasajeros: " .$viaje->getCantPasajeros()."\n". "Pasajeros: " . $pers->getApellido() . ", " .$str . "\n";
+                        echo "Datos de pasajeros: "  ."\n". "Apellido y nombre--> " . $pers->getApellido() . ", " .$pers->getNombre() . "\n" . "Nro de Tel--> " . $pers->getTelefono() . "\n";
                     }
                 }else{
                     //el vuelo no tiene pasajeros, solo muestra datos del vuelo
-                    echo "Datos viaje: "  ."\n". "Destino: " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros: " . $viaje->getCantMaxPasajeros()."\n". "Cantidad total de pasajeros: " .$viaje->getCantPasajeros()."\n";
+                    echo "Datos viaje: "  ."\n". "Destino--> " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros--> " . $viaje->getCantMaxPasajeros()."\n". "Cantidad total de pasajeros--> " .$viaje->getCantPasajeros()."\n";
                 }   
             }else{
                 echo "No se encontro el vuelo"."\n";
