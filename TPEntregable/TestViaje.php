@@ -2,17 +2,18 @@
 
 include "Viaje.php";
 include "Persona.php";
+include "ResponsableV.php";
 
 $listaViajes = array();
 $listaPasajeros = array();
 
-$opcion = 99;
-do{
+$opcion = 0;
+//do{
     menu($opcion,$listaViajes,$listaPasajeros);
-}while($opcion<>0);
+//}while($opcion<>0);
 //menú
 function menu($opcion,$listaViajes,$listaPasajeros){
-    echo "¡Bienvenido!"."\n";
+    echo "¡Bienvenido/a!"."\n";
     echo "Seleccione una opción para continuar: "."\n".
     "║ 1 ║ Cargar Viaje                        "."\n".
     "║ 2 ║ Buscar Viaje                        "."\n".
@@ -45,7 +46,7 @@ function menu($opcion,$listaViajes,$listaPasajeros){
                 // Verificar que $viaje->getPasajeros() no sea void
                  //validar que si el vuelo no tiene pasajeros que no intente mostrarlos.
                 if (!empty($viaje->getPasajeros())) {
-                    echo "Datos del viaje: "  ."\n". "Destino--> " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros--> " . $viaje->getCantMaxPasajeros()."\n". "Cantidad total de pasajeros--> " .$viaje->getCantPasajeros()."\n";
+                    echo "Datos del viaje: "  ."\n". "Destino--> " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros--> " . $viaje->getCantMaxPasajeros(). "Cantidad total de pasajeros--> " .$viaje->getCantPasajeros()."\n"."-----------"."\n"."Responsable del vuelo--> ".$viaje->getResponsable()."\n";
                     $personas = $viaje->getPasajeros();
                     for($i = 0; $i < count($personas); $i++){
                         $pers = $personas[$i];
@@ -54,7 +55,7 @@ function menu($opcion,$listaViajes,$listaPasajeros){
                     }
                 }else{
                     //el vuelo no tiene pasajeros, solo muestra datos del vuelo
-                    echo "Datos viaje: "  ."\n". "Destino--> " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros--> " . $viaje->getCantMaxPasajeros()."\n". "Cantidad total de pasajeros--> " .$viaje->getCantPasajeros()."\n";
+                    echo "Datos viaje: "  ."\n". "Destino--> " . $viaje->getDestino() ."\n". "Cantidad máxima de pasajeros--> " . $viaje->getCantMaxPasajeros(). "Cantidad total de pasajeros--> ".$viaje->getCantPasajeros()."\n"."-----------"."\n"."Responsable del vuelo--> ".$viaje->getResponsable()."\n";
                 }   
             }else{
                 echo "No se encontro el vuelo"."\n";
@@ -65,17 +66,42 @@ function menu($opcion,$listaViajes,$listaPasajeros){
             echo "Para cargar una persona, antes debe indicar a continuación el vuelo donde desea ubicarlo: "."\n"; 
             $nroVuelo=trim(fgets(STDIN));
             $vuelo = buscarViaje($listaViajes, $nroVuelo);
+        
             if (gettype($vuelo) === 'object' && get_class($vuelo) === 'Viaje'){
-                //si encontró el vuelo carga al pasajero
-                $pasajero=agregarPasajero($listaViajes,$nroVuelo);
-                //agrega el pasajero a la coleccion de pasajeros 
-                array_push($listaPasajeros,$pasajero);
-                //y a la coleccion de pasajeros en un vuelo.
-                $vuelo->cargarPasajeroVuelo($pasajero);
+                 //si encontro el vuelo debe revisar que el pasajero no exista aun-.
+                 $pasajerosVuelo = $vuelo->getPasajeros();
+                 if (!empty($pasajerosVuelo)) {
+                    //si encontró pasajeros busca el indicado
+                    echo "Ingrese el dni del pasajero que desea cargar: "."\n";
+                    $n = trim(fgets(STDIN));
+                    $condicion = validarPasajeroEnViaje($pasajerosVuelo, $n);
+                    //si lo encuentra no lo puede volver a cargar
+                    if ($condicion){
+                        echo "El pasajero ya se encuentra cargado en el vuelo"."\n";
+                    }else{
+                        //si encontró el vuelo y el pasajero no se encuentra en el, lo carga
+                        $pasajero=agregarPasajero($n,$listaViajes,$nroVuelo);
+                        //agrega el pasajero a la coleccion de pasajeros 
+                        array_push($listaPasajeros,$pasajero);
+                        //y a la coleccion de pasajeros en un vuelo.
+                        $vuelo->cargarPasajeroVuelo($pasajero);
+                        $vuelo->cuentaCantPasajeros(1);
+                    }
+                 }else{
+                    //si encontró el vuelo y aun no tiene pasajeros, carga
+                    $pasajero=agregarPasajero(0,$listaViajes,$nroVuelo);
+                    //agrega el pasajero a la coleccion de pasajeros 
+                    array_push($listaPasajeros,$pasajero);
+                    //y a la coleccion de pasajeros en un vuelo.
+                    $vuelo->cargarPasajeroVuelo($pasajero);
+                    $vuelo->cuentaCantPasajeros(1);
+                 }
+            
             }else{
                 echo "No se encontro el vuelo"."\n";
             } 
-            menu($opcion,$listaViajes,$listaPasajeros); //vuelve a llamar al menu con las colecciones.
+            menu($opcion,$listaViajes,$listaPasajeros);
+             //vuelve a llamar al menu con las colecciones.
             break;
         case 4:
             echo "eligió la opción 'Modificar Pasajero'"."\n";
@@ -120,8 +146,26 @@ function agregarViaje($listaViajes){
     echo "Indique la capacidad máxima de personas que tiene el viaje: ";
     $cantMax = fgets(STDIN);
 
+    echo "Ingrese los datos del responsable del vuelo: "."\n";
+
+    echo "Nombre"."\n";
+    $nombre = trim(fgets(STDIN));
+
+    echo "Apellido: "."\n";
+    $apellido = trim(fgets(STDIN));
+
+    echo "numEmpleado: "."\n";
+    $numEmpleado = fgets(STDIN);
+
+    echo "numLicencia"."\n";
+    $numLicencia = fgets(STDIN);
+    
+    $responsable = new ResponsableV();
+    $responsable->cargarResponsable($nombre, $apellido, $numEmpleado, $numLicencia);
+    
     //invoca al metodo insert de la clase viaje con los parametros indicados anteriormente.
     $viaje->cargarViaje($id,$destino,$cantMax);
+    $viaje->setResponsable($responsable);
 
     //echo "Viaje cargado en array con éxito ";
    
@@ -192,13 +236,16 @@ function listarViajes($listaViajes){
  * @param array $colPasajeros
  * @return Persona 
  */
-function agregarPasajero($listaViajes, $nroVuelo){
+function agregarPasajero($n,$listaViajes, $nroVuelo){
     //crea instancia de clase viaje
     $persona1 = new Persona();
     //setea los datos del vuelo
-    echo "Indique el Dni del pasajero (numérico): ";
-    $dni = fgets(STDIN);
-
+    if(empty($n)){
+        echo "Indique el Dni del pasajero (numérico): ";
+        $dni = fgets(STDIN);
+    }else{
+        $dni = $n;
+    }
     echo "Indique el nombre del pasajero: ";
     $nombre = trim(fgets(STDIN));
 
@@ -233,6 +280,27 @@ function buscarPasajero($listaPasajeros, $n){
         
     }
 }
+
+/**
+ * Summary of validarPasajeroEnViaje
+ * @param array $listaPasajeros
+ * @param int $n
+ * @return boolean
+ */
+function validarPasajeroEnViaje($listaPasajeros, $n){
+    $condicion = false;
+    for ($i = 0; $i < count($listaPasajeros); $i++){
+        
+        $persona=$listaPasajeros[$i];
+        if (trim($persona->getDni()) === $n){
+            //echo "Se encontro al pasajero con " . "\n". "Nombre: " . $persona->getNombre() . "\n". " Apellido: " . $persona->getApellido() ."\n". "Nro de vuelo: ".$persona->getVuelo()."\n";
+            $condicion = true;
+        }
+        
+    }
+    return $condicion;
+}
+
 
 /**
  * Summary of modificarPasajero

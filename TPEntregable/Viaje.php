@@ -13,7 +13,17 @@ class Viaje{
     private $cantMax;
     private $cantPasajeros;
     private $pasajeros = array();
-
+    private $responsable;
+    
+    //...
+    
+    public function setResponsable($responsable) {
+        $this->responsable = $responsable;
+    }
+    
+    public function getResponsable() {
+        return $this->responsable;
+    }
     
     //
     //GETTERS
@@ -80,6 +90,7 @@ class Viaje{
         $this->destino = "";
         $this->cantMax = "";
         $this->cantPasajeros = 0;
+        $this->responsable = "";
     }
 
 	 // declara variables tipo parametro-.
